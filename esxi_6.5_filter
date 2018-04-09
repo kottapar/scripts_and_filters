@@ -19,7 +19,7 @@ filter {
         ]
     }
 # Dropping off messages that are known to be info or are harmless
-    if ( [message] =~ "^verbose|^info|^-->|^crond|^starting hostd probing|Early init logs|Completed WaitForUpdates|Starting next WaitForUpdates|Resolved endpoint|Applying updates|RecordOp ASSIGN|already registered|Creating archive|Locking esx.conf|Unlocking esx.conf|DHCPACK from|DHCPREQUEST on|already loaded|Ignoring|renewal in|Section for VMware ESX|Looking for a DC in domain|Determining the current time for|Successfully acquired hardware|elxnet_freeQueue|elxnet_quiesceQueue|elxnet_startQueue|elxnet_allocQueue|failed H:0x0|Failed: H:0x0|^up *,*VMs|[LikewiseGetDomainJoinInfo:354" ) {
+    if ( [message] =~ "^verbose|^info|^-->|^crond|^starting hostd probing|Early init logs|Completed WaitForUpdates|Starting next WaitForUpdates|Resolved endpoint|Applying updates|RecordOp ASSIGN|already registered|Creating archive|Locking esx.conf|Unlocking esx.conf|DHCPACK from|DHCPREQUEST on|already loaded|Ignoring|renewal in|Section for VMware ESX|Looking for a DC in domain|Determining the current time for|Successfully acquired hardware|elxnet_freeQueue|elxnet_quiesceQueue|elxnet_startQueue|elxnet_allocQueue|failed H:0x0|Failed: H:0x0|^up *,*VMs|LikewiseGetDomainJoinInfo:354" ) {
       drop { }
     } else if [message] =~ /(?i)warning|error|fault|ALERT|busy|Failed|[\s]dead|[\s]space|esx\.|vob\.|com\.vmware|nmp|volume|consolidate|FS3|question|ha-eventmgr|VisorFS|Fil3|DLX|MCE|HBX|MPN|mpn|p2m|Reset|timeout|msg\./ and [message] !~ /(?i)crossdup|hostprofiletrace/{
     
