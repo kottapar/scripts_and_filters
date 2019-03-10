@@ -1,0 +1,153 @@
+filter {
+  fingerprint {
+    method => "SHA1"
+    source => "message"
+    key => "vm elk"
+  }
+  if [program] == "VM_HST" {
+    csv {
+      separator => ","
+      columns => ["DC","Host","Cluster","Num_CPU","Cores_per_CPU","Num_Cores","CPU_usage_pct","Memory_mb","Memory_usage_pct","Num_VMs","VMs_per_Core","Num_vCPUs","vCPUs_per_Core","vRAM","VM_Used_memory","ESX_Version","CPU_Model","Vendor","Model","Service_Tag","BIOS_Version"]
+    }
+    mutate {
+      convert => {
+        "CPU_Model" => "string"
+        "Service_Tag" => "string"
+        "Num_CPU" => "integer"
+        "Cores_per_CPU" => "integer"
+        "Num_Cores" => "integer"
+        "CPU_usage_pct" => "float"
+        "Memory_mb" => "float"
+        "Memory_usage_pct" => "float"
+        "Num_VMs" => "integer"
+        "VMs_per_Core" => "float"
+        "Num_vCPUs" => "integer"
+        "vCPUs_per_Core" => "float"
+        "vRAM" => "float"
+        "VM_Used_memory" => "float"
+      }
+    }
+  } else if [program] == "VM_CLUS" {
+    csv {
+      separator => ","
+      columns => ["DC","Cluster","Num_ESX","Num_CPUs","Num_Cores","Cpu_usg_pct","avg_cpu_usage_pct","max_cpu_usage_pct","esx_mem_avail_Gb","Mem_usg_pct","avg_mem_usage_pct","max_mem_usage_pct","Num_VMs","VMs_per_core","vCPUs_per_core","Num_VCPUs","mem_vm_alloc_gb","prov_disk_gb","util_disk_gb"]
+    }
+    mutate {
+      convert => {
+        "Num_ESX" => "integer"
+        "Num_CPUs" => "integer"
+        "Num_Cores" => "integer"
+        "Cpu_usg_pct" => "float"
+        "avg_cpu_usage_pct" => "float"
+        "max_cpu_usage_pct" => "float"
+        "esx_mem_avail_Gb" => "float"
+        "Mem_usg_pct" => "float"
+        "avg_mem_usage_pct" => "float"
+        "max_mem_usage_pct" => "float"
+        "Num_VMs" => "integer"
+        "VMs_per_core" => "float"
+        "vCPUs_per_core" => "float"
+        "Num_VCPUs" => "integer"
+        "mem_vm_alloc_gb" => "float"
+        "prov_disk_gb" => "float"
+        "util_disk_gb" => "float"
+      }
+    }
+  } else if [program] == "VM_INTLNT" {
+      csv {
+        separator => ","
+        columns => ["DC","VM","Num_CPUs","Memory_MB","Num_Disks","Provisioned_MB","Utilized_MB","Datastore","Cluster","Host","OS_config_file","OS_VMware_Tools","OS","OS_Type","Powerstate","Template","VM_Version","Tools","Tools_Version","Application","Switch","Connected","Mac Address","Type","IP"]
+      }
+      mutate {
+        convert => {
+          "Num_CPUs" => "integer"
+          "Memory_MB" => "float"
+          "Num_Disks" => "float"
+          "Provisioned_MB" => "float"
+          "Utilized_MB" => "float"
+        }
+      }
+  } else if [program] == "VM_HLT" {
+      grok {
+        break_on_match => true
+        match => { "message" => "%{WORD:DC},%{DATA:VM},%{GREEDYDATA:health_check_msg}" }
+        match => { "message" => "%{GREEDYDATA:health_check_msg}" }
+      }
+  } else if [program] == "VM_DST" {
+      csv {
+        separator => ","
+        columns => ["DC","Name","Num_VMs","Capacity_MB","Provisioned_MB","In_Use_MB","Free_MB","Free_pct","Num_Hosts","Hosts","Version"]
+      }
+      mutate {
+        convert => {
+          "Num_VMs" => "integer"
+          "Capacity_MB" => "float"
+          "Provisioned_MB" => "float"
+          "In_Use_MB" => "float"
+          "Free_MB" => "float"
+          "Free_pct" => "float"
+          "Num_Hosts" => "integer"
+        }
+      }
+  } else if [program] == "VM_LIC" {
+      csv {
+        separator => ","
+        columns => ["DC","Name","Total","Used"]
+      }
+      mutate {
+        convert => {
+          "Total" => "float"
+          "Used" => "float"
+        }
+      }
+  } else if [program] == "VM_DSK" {
+      csv {
+        separator => ","
+        columns => ["DC","VM","Disk","Capacity_MB","Raw","Disk_Mode","Thin","Application","Cluster","Host","Datastore"]
+      }
+      mutate {
+        convert => {
+          "Capacity_MB" => "float"
+        }
+      }
+  }
+}
+
+output {
+  if [program] == "VM_HST" {
+    elasticsearch {
+      index => "vmw-vhost-%{+YYYY.MM}"
+      hosts => [ 1.2.3.4:9200 ]
+    }
+  } else if [program] == "VM_INTLNT" {
+    elasticsearch {
+      index => "vmw-vinfotoolsnetw-%{+YYYY.MM}"
+      hosts => [ 1.2.3.4:9200 ]
+    }
+  } else if [program] == "VM_CLUS" {
+    elasticsearch {
+      index => "vmw-cluster-%{+YYYY.MM}"
+      hosts => [ 1.2.3.4:9200 ]
+    }
+  } else if [program] == "VM_HLT" {    
+    elasticsearch {
+      index => "vmw-vhealth-%{+YYYY.MM}"
+      hosts => [ 1.2.3.4:9200 ]
+    }
+  } else if [program] == "VM_DST" {    
+    elasticsearch {
+      index => "vmw-vdatastr-%{+YYYY.MM}"
+      hosts => [ 1.2.3.4:9200 ]
+    }
+  } else if [program] == "VM_LIC" {    
+    elasticsearch {
+      index => "vmw-vlic-%{+YYYY.MM}"
+      hosts => [ 1.2.3.4:9200 ]
+    }
+  } else if [program] == "VM_DSK" {   
+    elasticsearch {
+      index => "vmw-vdisk-%{+YYYY.MM}"
+      hosts => [ 1.2.3.4:9200 ]
+    }
+  }
+}
