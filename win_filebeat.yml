@@ -1,0 +1,28 @@
+#=========================== Filebeat prospectors =============================
+
+filebeat.prospectors:
+
+- input_type: log
+  paths:
+    - E:\SiteScope\logs\alert.log
+  fields: {logtype: sitescope_alert}
+  multiline.pattern: '^[0-9]{2}:[0-9]{2}:[0-9]{2}'
+  multiline.negate: true
+  multiline.match: after
+
+filebeat.registry_file: E:\filebeat\data\registry
+
+#================================ Outputs =====================================
+output.logstash:
+  hosts: ["10.17.10.223:5044"]
+
+#================================ Logging =====================================
+
+# Sets log level. The default log level is info.
+# Available log levels are: critical, error, warning, info, debug
+#logging.level: debug
+
+# At debug level, you can selectively enable logging only for some components.
+# To enable all selectors use ["*"]. Examples of other selectors are "beat",
+# "publish", "service".
+#logging.selectors: ["*"]
