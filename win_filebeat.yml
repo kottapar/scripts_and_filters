@@ -4,7 +4,7 @@ filebeat.prospectors:
 
 - input_type: log
   paths:
-    - E:\SiteScope\logs\alert.log
+    - D:\Apps\SiteScope\logs\alert.log
   fields: {logtype: sitescope_alert}
   multiline.pattern: '^[0-9]{2}:[0-9]{2}:[0-9]{2}'
   multiline.negate: true
