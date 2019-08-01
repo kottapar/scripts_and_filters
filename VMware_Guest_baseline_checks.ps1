@@ -1,7 +1,7 @@
 
 <# Title : Verify VM CIS benchmark attributes #>
 
-<# Create a read-only user (vm_rouser here) and generate the clixml file. Please the file in the same dir in which this script is placed.
+<# Create a read-only user (vm_rouser here) and generate the clixml file. Place the file in the same dir in which this script is placed.
    This script can then be scheduled via a batch job in task scheduler to generate reports daily.
    In the same dir create a file vclist.txt and populate it with a list of vcenters
    #>
